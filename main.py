@@ -5,7 +5,7 @@ from game_engine import GameEngine
 def main():
 
     gameEngine = GameEngine()
-    agentList = [HumanAgent(gameEngine),RandomAgent(gameEngine),RandomAgent(gameEngine),RandomAgent(gameEngine)]
+    agentList = [RandomAgent(gameEngine),RandomAgent(gameEngine),RandomAgent(gameEngine),RandomAgent(gameEngine)]
     gameEngine.set_agent_list(agentList)
     gameEngine.start_game()
     
