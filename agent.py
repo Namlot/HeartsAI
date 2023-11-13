@@ -62,7 +62,6 @@ class Agent(ABC):
 
         #already played
         for agent in self.gameEngine.agentList:
-            if(agent != self):
                 for card in agent.cardsWon:
                     stateArray.append([card.get_numerical_value(),0,0,0,1])
 
