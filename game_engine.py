@@ -24,7 +24,7 @@ class GameEngine:
     
     def createDeck(self):
         for suit in Suit:
-            for rank in range(1, 14):
+            for rank in range(2, 15):
                 self.deck.append(Card(suit, rank))
         
     def shuffle(self):
