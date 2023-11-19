@@ -1,5 +1,6 @@
 from enum_suit import Suit
 
+
 class Card:
     suit: Suit
     value: int
@@ -9,6 +10,8 @@ class Card:
         self.suit = suit
         self.value = value
 
-    def get_numerical_value(self) -> int: 
+    def get_numerical_value(self) -> int:
         return self.suit.value * 13 + self.value
 
+    def __lt__(self, other):
+        return self.get_numerical_value() < other.get_numerical_value()

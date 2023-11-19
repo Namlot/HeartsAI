@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class Suit(Enum):
     DIAMOND = 0
     HEART = 1
