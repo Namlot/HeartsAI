@@ -183,7 +183,7 @@ class GameEngine:
         if self.training:
             for agent in self.agentList:
                 agent.train_round(agent.roundScore)
-            if self.roundNumber > 1000:
+            if self.roundNumber > 1000000:
                 print("finished playing")
                 num = 0
                 for agent in self.agentList:
@@ -191,7 +191,7 @@ class GameEngine:
                     num += 1
                 self.end = True
                 return
-            if self.roundNumber % 100 == 0:
+            if self.roundNumber % 1000 == 0:
                 print("training round", self.roundNumber)
 
         else:

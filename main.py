@@ -5,8 +5,8 @@ from game_engine import GameEngine
 
 
 def main():
-    gameEngine = GameEngine()
-    agentList = [HumanAgent(gameEngine), RLAgent(gameEngine,"RLAgent0"), RLAgent(gameEngine,"RLAgent0"), RLAgent(gameEngine,"RLAgent0")]
+    gameEngine = GameEngine(train=True)
+    agentList = [RLAgent(gameEngine,"RLAgent0"), RLAgent(gameEngine,"RLAgent0"), RLAgent(gameEngine,"RLAgent0"), RLAgent(gameEngine,"RLAgent0")]
     gameEngine.set_agent_list(agentList)
     gameEngine.start_game()
 
