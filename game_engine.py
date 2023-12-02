@@ -4,6 +4,8 @@ from typing import List
 from agent import Agent
 from human_agent import HumanAgent
 import random
+import torch
+import os
 
 
 class GameEngine:
@@ -17,7 +19,7 @@ class GameEngine:
     end: bool
     human: bool
 
-    def __init__(self, train=False):
+    def __init__(self, train=False, collect=False, savePath=None):
         self.currentTrickList = []
         self.deck = []
         self.agentList = []
@@ -25,6 +27,16 @@ class GameEngine:
         self.training = train
         self.end = False
         self.human = False
+        self.collect = collect
+
+        if savePath is not None:
+            self.path = savePath
+            self.playing_data = torch.load(os.path.join(savePath,"playingData.pt"))
+            self.passing_data = torch.load(os.path.join(savePath,"passingData.pt"))
+        else:
+            self.path = "human_data"
+            self.playing_data = torch.empty((0, 261))
+            self.passing_data = torch.empty((0, 107))
 
     def createDeck(self):
         for suit in Suit:
@@ -73,7 +85,14 @@ class GameEngine:
             self.turnPlayerIndex = 0
 
         currentAgent: Agent = self.agentList[self.turnPlayerIndex]
+        if(self.collect and type(currentAgent) is HumanAgent):
+            currentState = currentAgent.determine_state()
+            dataState = [card[1:] for card in currentState]
+            state_tensor = torch.tensor(dataState, dtype=torch.float).flatten()
         cardSelected: Card = currentAgent.perform_action()
+        if (self.collect and type(currentAgent) is HumanAgent):
+            data_tensor = torch.cat((state_tensor, torch.tensor([cardSelected.get_numerical_value()]))).clone().detach()
+            self.playing_data = torch.cat((self.playing_data, data_tensor[None,:].clone().detach()), dim=0)
         self.currentTrickList.append(currentAgent.hand.pop(currentAgent.hand.index(cardSelected)))
         if len(self.currentTrickList) < 4:
             self.next_turn()
@@ -95,7 +114,7 @@ class GameEngine:
             currentTrickListString = ",".join(
                 map(lambda card: card.suit.name + " " + str(card.value), self.currentTrickList))
             print("The stack was: " + currentTrickListString)
-            print("Player", self.agentList.index(winningCard.agent), "won the stack with", winningCard.suit.name, str(winningCard.value))
+            print("Player", self.agentList.index(winningCard.agent)+1, "won the stack with", winningCard.suit.name, str(winningCard.value))
 
         while self.currentTrickList:
             winningCard.agent.cardsWon.append(self.currentTrickList.pop())
@@ -120,8 +139,17 @@ class GameEngine:
             return
 
         cardsToPass: List[List[Card]] = []
-        for agent in self.agentList:
+
+        for i in range(len(self.agentList)):
+            agent = self.agentList[i]
+            if (self.collect and type(agent) is HumanAgent):
+                currentState = agent.determine_state()
+                dataState = [card[1:2] + [0] for card in currentState]
+                state_tensor = torch.tensor(dataState, dtype=torch.float).flatten()
             cardsToPass.append(agent.pass_cards())
+            if (self.collect and type(agent) is HumanAgent):
+                data_tensor = torch.cat((state_tensor, torch.tensor([card.get_numerical_value() for card in cardsToPass[i]], dtype=torch.float).flatten())).clone().detach()
+                self.passing_data = torch.cat((self.passing_data, data_tensor[None, :].clone().detach()), dim=0)
 
         # pass right
         if self.roundNumber % 4 == 1:
@@ -199,6 +227,10 @@ class GameEngine:
                 if agent.score > 100:
                     print("finished playing")
                     self.print_final_scores()
+                    print(self.playing_data.shape)
+                    print(self.passing_data.shape)
+                    torch.save(self.playing_data,os.path.join(self.path,"playingData.pt"))
+                    torch.save(self.passing_data, os.path.join(self.path, "passingData.pt"))
                     self.end = True
                     return
 
