@@ -85,11 +85,14 @@ class GameEngine:
             self.turnPlayerIndex = 0
 
         currentAgent: Agent = self.agentList[self.turnPlayerIndex]
+
         if(self.collect and type(currentAgent) is HumanAgent):
             currentState = currentAgent.determine_state()
             dataState = [card[1:] for card in currentState]
             state_tensor = torch.tensor(dataState, dtype=torch.float).flatten()
+
         cardSelected: Card = currentAgent.perform_action()
+
         if (self.collect and type(currentAgent) is HumanAgent):
             data_tensor = torch.cat((state_tensor, torch.tensor([cardSelected.get_numerical_value()]))).clone().detach()
             self.playing_data = torch.cat((self.playing_data, data_tensor[None,:].clone().detach()), dim=0)
@@ -142,11 +145,14 @@ class GameEngine:
 
         for i in range(len(self.agentList)):
             agent = self.agentList[i]
+
             if (self.collect and type(agent) is HumanAgent):
                 currentState = agent.determine_state()
                 dataState = [card[1:2] + [0] for card in currentState]
                 state_tensor = torch.tensor(dataState, dtype=torch.float).flatten()
+
             cardsToPass.append(agent.pass_cards())
+
             if (self.collect and type(agent) is HumanAgent):
                 data_tensor = torch.cat((state_tensor, torch.tensor([card.get_numerical_value() for card in cardsToPass[i]], dtype=torch.float).flatten())).clone().detach()
                 self.passing_data = torch.cat((self.passing_data, data_tensor[None, :].clone().detach()), dim=0)
@@ -227,10 +233,11 @@ class GameEngine:
                 if agent.score > 100:
                     print("finished playing")
                     self.print_final_scores()
-                    print(self.playing_data.shape)
-                    print(self.passing_data.shape)
-                    torch.save(self.playing_data,os.path.join(self.path,"playingData.pt"))
-                    torch.save(self.passing_data, os.path.join(self.path, "passingData.pt"))
+                    if self.collect:
+                        print(self.playing_data.shape)
+                        print(self.passing_data.shape)
+                        torch.save(self.playing_data,os.path.join(self.path,"playingData.pt"))
+                        torch.save(self.passing_data, os.path.join(self.path, "passingData.pt"))
                     self.end = True
                     return
 

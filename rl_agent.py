@@ -33,11 +33,10 @@ class RLAgent(Agent):
             self.round_states = []
 
     def choose_action(self, state, possibleActionList):
-        game_state = self.determine_state()
-        training_state = [card[1:] for card in game_state]
+        action_state = [card[1:] for card in state]
         best_cards = []
         best_reward = 0
-        state_tensor = torch.tensor(training_state, dtype=torch.float).flatten()
+        state_tensor = torch.tensor(action_state, dtype=torch.float).flatten()
         for card in possibleActionList:
             state_tensor[(card.get_numerical_value() - 2) * 5 + 2] = 1
             state_tensor[(card.get_numerical_value() - 2) * 5] = 0

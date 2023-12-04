@@ -7,11 +7,7 @@ class RandomAgent(Agent):
         return random.choice(possibleActionList)
 
     def pass_cards(self):
-        cardList = []
-        for i in range(3):
-            nextCard = random.choice(self.hand)
-            cardList.append(nextCard)
-        return cardList
+        return random.sample(self.hand, 3)
 
     def train_trick(self, trick_penalty):
         return # RandomAgent does not utilize training
